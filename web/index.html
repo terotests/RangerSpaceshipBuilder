@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alusrakentaja</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>🚀 Alusrakentaja</h1>
+  <select id="shipSelect" title="Valitse alus"></select>
+  <button id="btnNew" title="Uusi tyhjä alus">Uusi</button>
+  <button id="btnSave" title="Tallenna omiin aluksiin (selaimeen)">Tallenna</button>
+  <button id="btnDelete" title="Poista omista aluksista">Poista</button>
+  <span class="sep"></span>
+  <button id="btnUndo" title="Kumoa (Ctrl+Z)">↶</button>
+  <button id="btnRedo" title="Tee uudelleen (Ctrl+Y)">↷</button>
+  <span class="sep"></span>
+  <label class="toggle"><input type="checkbox" id="chkLineup"> Mittakaava</label>
+  <span class="grow"></span>
+  <button id="btnOpen" title="Avaa .ship.json">Avaa…</button>
+  <button id="btnRecipe" title="Lataa resepti (.ship.json)">⬇ Resepti</button>
+  <button id="btnGlb" title="Lataa 3D-malli (.glb)">⬇ .glb</button>
+  <button id="btnPack" title="Lataa kaikki alukset pakettina RangerGamesiin (.zip)">⬇ Paketti</button>
+  <input type="file" id="fileInput" accept=".json,application/json" hidden>
+</header>
+<main>
+  <aside id="left">
+    <section>
+      <h2>Alus</h2>
+      <div id="shipProps"></div>
+    </section>
+    <section>
+      <h2>Osat <span class="hint">(napauta osaa 3D-näkymässä)</span></h2>
+      <ul id="partList"></ul>
+      <div class="row">
+        <select id="addType"></select>
+        <button id="btnAdd">+ Lisää</button>
+      </div>
+      <div class="row">
+        <button id="btnDup" title="Monista valittu osa">Monista</button>
+        <button id="btnUp" title="Siirrä ylös">▲</button>
+        <button id="btnDown" title="Siirrä alas">▼</button>
+        <button id="btnDel" class="danger" title="Poista valittu osa">Poista</button>
+      </div>
+    </section>
+  </aside>
+  <div id="center">
+    <canvas id="view"></canvas>
+    <div id="status"></div>
+    <div id="lineupLabels"></div>
+  </div>
+  <aside id="right">
+    <div class="tabs">
+      <button data-tab="inspector" class="on">Ominaisuudet</button>
+      <button data-tab="json">JSON</button>
+      <button data-tab="help">Ohje</button>
+    </div>
+    <div id="tab-inspector" class="tab"></div>
+    <div id="tab-json" class="tab" hidden>
+      <textarea id="jsonText" spellcheck="false"></textarea>
+      <div class="row"><button id="btnApplyJson">Käytä</button><span id="jsonError" class="err"></span></div>
+    </div>
+    <div id="tab-help" class="tab" hidden>
+      <p>Alus rakennetaan <b>osista</b>: runko, siivet, moottorit, ohjaamo, tornit, renkaat, paneelit, piikit, möykyt…
+      Jokaisella osalla on paikka, kierto ja skaala, ja sen voi <b>peilata</b> toiselle puolelle tai <b>toistaa</b>
+      (esim. avaruusaseman moduulit ympyrässä: kopioita 6, kierto / kopio z = 60).</p>
+      <p>Kärki osoittaa <b>+z</b>-suuntaan ja ylös on <b>+y</b>.</p>
+      <p><b>Runko</b> on poikkileikkausten jono hännästä keulaan: <code>[z, leveys, korkeus, pyöreys, dy]</code>.
+      Pyöreys 2 = soikio, 4+ = laatikkomainen, 1 = vinoneliö. Kohina ja rivat tekevät rungosta elävän näköisen.</p>
+      <p>Hiiri: veto kääntää, oikea nappi tai vaihto+veto siirtää, rulla zoomaa. Kosketus: yksi sormi kääntää, kaksi zoomaa.</p>
+      <p><b>⬇ Paketti</b> tekee zipin (<code>ships.json</code>, <code>.glb</code>-mallit ja reseptit), jonka voi purkaa RangerGamesin pelin kansioon.</p>
+    </div>
+  </aside>
+</main>
+<script src="presets.js"></script>
+<script type="module" src="editor.js"></script>
+</body>
+</html>

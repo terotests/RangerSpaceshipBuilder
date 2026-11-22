@@ -1,0 +1,4 @@
+/target
+/dist
+/.deps
+node_modules

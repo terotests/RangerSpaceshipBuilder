@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: MIT
+#
+# RangerSpaceshipBuilder: spaceships for RangerGames, built from compact
+# parametric recipes (.ship.json) and exported as glTF binaries (.glb).
+#
+#   crates/ship_core  recipes -> meshes -> .glb, in Ranger's strict Rust subset
+#                     (`use ranger::prelude::*`): cargo builds it, and rgrc
+#                     writes it for Ranger's other targets (JS, C++, Go …)
+#   crates/ship_web   ship_core as WebAssembly behind a C ABI, for the editor
+#   crates/ship_cli   recipes -> .glb files and a ship pack for RangerGames
+#
+# .deps/ is filled by scripts/setup.sh (Ranger, for the `ranger` prelude crate).
+
+[workspace]
+resolver = "2"
+members = ["crates/ship_core", "crates/ship_web", "crates/ship_cli"]
+exclude = [".deps"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+overflow-checks = false
+debug = false
+panic = "abort"
+
+[profile.dev]
+overflow-checks = false
+opt-level = 1

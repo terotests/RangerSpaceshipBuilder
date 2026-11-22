@@ -1,0 +1,60 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Rust and the wasm target
+        run: rustup target add wasm32-unknown-unknown
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            target
+            .deps
+          key: ${{ runner.os }}-${{ hashFiles('Cargo.lock', 'scripts/setup.sh') }}
+      - name: Ranger (prelude crate and rgrc)
+        run: bash scripts/setup.sh
+      - name: Tests
+        run: cargo test --workspace
+      - name: Ranger subset and JavaScript parity
+        run: TARGETS="es6 cpp go python" bash scripts/check-ranger.sh
+      - name: Ship pack
+        run: cargo run --release -p ship_cli -- pack ships dist/pack
+      - name: Editor
+        run: |
+          bash scripts/build-web.sh
+          mkdir -p dist/web/pack && cp dist/pack/* dist/web/pack/
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: dist/web
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

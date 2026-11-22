@@ -1,0 +1,13 @@
+[package]
+name = "ship_cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[[bin]]
+name = "ship"
+path = "src/main.rs"
+
+[dependencies]
+ship_core = { path = "../ship_core" }

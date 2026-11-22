@@ -1,0 +1,20 @@
+{
+  "format": "ranger-ship", "version": 1, "order": 3,
+  "name": "Ampiainen", "class": "creature", "length": 12, "seed": 5,
+  "palette": { "hull": "#d49a2a", "accent": "#2b1d12", "dark": "#3b2a1a", "glow": "#b8ff4d", "glass": "#a8e6d0" },
+  "parts": [
+    { "name": "takaruumis", "type": "hull", "sides": 12, "smooth": 3, "panel": 0, "ribs": 0.1, "ribFreq": 2.6, "noise": 0.04,
+      "sections": [[-3.0, 0.02, 0.02, 2, 0.2], [-2.5, 0.6, 0.55, 2, 0.15], [-1.7, 1.0, 0.85, 2, 0.05], [-0.9, 0.85, 0.7, 2], [-0.3, 0.4, 0.38, 2]],
+      "bands": [1, 3] },
+    { "name": "keskiruumis", "type": "blob", "at": [0, 0.05, 0.45], "size": [0.85, 0.7, 1.3], "noise": 0.1, "noiseScale": 2, "rings": 8, "sides": 12 },
+    { "name": "pää", "type": "blob", "at": [0, 0.1, 1.45], "size": [0.8, 0.6, 0.7], "noise": 0.06, "rings": 7, "sides": 12, "color": "dark" },
+    { "name": "silmät", "type": "blob", "at": [0.26, 0.2, 1.62], "mirror": true, "size": [0.28, 0.26, 0.32], "noise": 0, "rings": 5, "sides": 8, "color": "glow", "glow": true },
+    { "name": "leuat", "type": "spike", "mirror": true, "path": [[0.18, -0.05, 1.7], [0.3, -0.1, 2.05], [0.12, -0.12, 2.3]], "r0": 0.07, "r1": 0.01, "sides": 5, "color": "accent" },
+    { "name": "tuntosarvet", "type": "spike", "mirror": true, "path": [[0.12, 0.35, 1.6], [0.35, 0.9, 1.9], [0.7, 1.2, 1.7]], "r0": 0.025, "r1": 0.01, "sides": 4, "steps": 6, "color": "accent" },
+    { "name": "etusiivet", "type": "wing", "at": [0.3, 0.3, 0.9], "mirror": true, "span": 2.6, "root": 0.9, "tip": 0.5, "sweep": 1.2, "thick": 0.03, "tipThick": 1, "dihedral": 12, "color": "glass", "panel": 0 },
+    { "name": "takasiivet", "type": "wing", "at": [0.3, 0.25, 0.2], "mirror": true, "span": 1.8, "root": 0.7, "tip": 0.35, "sweep": 1.1, "thick": 0.03, "tipThick": 1, "dihedral": 8, "color": "glass", "panel": 0 },
+    { "name": "jalat", "type": "spike", "mirror": true, "path": [[0.3, -0.2, 0.6], [0.7, -0.5, 0.8], [0.8, -0.9, 1.2]], "r0": 0.05, "r1": 0.015, "sides": 4, "color": "accent", "repeat": { "count": 3, "step": [0, 0, -0.35] } },
+    { "name": "piikki", "type": "spike", "path": [[0, 0.15, -2.9], [0, 0.05, -3.3], [0, -0.15, -3.6]], "r0": 0.09, "r1": 0.0, "sides": 6, "color": "accent" },
+    { "name": "hehkupussit", "type": "blob", "at": [0.42, -0.12, -1.5], "mirror": true, "size": [0.18, 0.18, 0.5], "noise": 0, "rings": 4, "sides": 6, "color": "glow", "glow": true }
+  ]
+}

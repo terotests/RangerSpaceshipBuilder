@@ -1,0 +1,22 @@
+{
+  "format": "ranger-ship", "version": 1, "order": 6,
+  "name": "Vasara", "class": "capital", "length": 680, "seed": 42,
+  "palette": { "hull": "#7d858f", "accent": "#b33a3a", "dark": "#2c3036", "glow": "#ffcf6b", "glass": "#ffe3a3" },
+  "parts": [
+    { "name": "runko", "type": "hull", "sides": 8, "smooth": 1, "belly": 0.75, "panel": 0.18,
+      "sections": [[-8.0, 3.0, 1.6, 7], [-6.0, 3.4, 1.8, 7], [-1.0, 3.1, 1.7, 7], [4.0, 2.4, 1.4, 6], [5.6, 2.6, 1.3, 6], [6.6, 5.0, 1.2, 7], [8.0, 4.4, 0.9, 6], [8.7, 3.0, 0.45, 5]],
+      "bands": [4], "greebles": 110, "greebleSize": 0.22, "greebleArc": 0.45, "windows": 80, "windowSize": 0.05, "windowHeight": 0.05 },
+    { "name": "vatsa", "type": "box", "at": [0, -1.0, -1.5], "size": [2.2, 0.5, 9.0], "taper": [0.6, 0.6], "bevel": 0.3, "color": "dark" },
+    { "name": "torni", "type": "box", "at": [0, 1.4, -5.2], "size": [1.6, 1.4, 2.4], "taper": [0.75, 0.85], "bevel": 0.15, "lift": -0.1 },
+    { "name": "silta", "type": "box", "at": [0, 2.3, -5.4], "size": [2.4, 0.45, 1.0], "taper": [0.85, 0.7], "bevel": 0.2 },
+    { "name": "sillan ikkunat", "type": "box", "at": [0, 2.36, -4.88], "size": [1.9, 0.1, 0.04], "color": "glass", "glow": true },
+    { "name": "mastot", "type": "spike", "mirror": true, "path": [[0.5, 2.5, -5.6], [0.6, 3.6, -5.9], [0.5, 4.2, -6.2]], "r0": 0.06, "r1": 0.01, "sides": 4, "color": "dark" },
+    { "name": "päätykit", "type": "turret", "at": [0, 0.9, 0.0], "r": 0.55, "barrels": 3, "barrelLen": 1.6, "barrelR": 0.06, "repeat": { "count": 3, "step": [0, -0.05, 1.5] } },
+    { "name": "sivutykit", "type": "turret", "at": [1.5, 0.5, -3.2], "rot": [0, 0, -50], "mirror": true, "r": 0.3, "barrels": 2, "barrelLen": 0.8, "repeat": { "count": 5, "step": [0, 0, 1.5] } },
+    { "name": "vasaran kärjet", "type": "box", "at": [2.4, 0, 7.4], "mirror": true, "size": [0.8, 1.4, 2.2], "taper": [0.6, 0.5], "bevel": 0.25, "color": "accent" },
+    { "name": "moottorilohko", "type": "box", "at": [0, 0, -8.6], "size": [3.6, 2.0, 1.4], "taper": [0.85, 0.85], "bevel": 0.25, "color": "dark" },
+    { "name": "päämoottorit", "type": "engine", "at": [1.15, 0.35, -9.6], "mirror": true, "r": 0.5, "len": 1.4 },
+    { "name": "keskimoottori", "type": "engine", "at": [0, 0.35, -9.7], "r": 0.6, "len": 1.5 },
+    { "name": "alamoottorit", "type": "engine", "at": [0.6, -0.55, -9.5], "mirror": true, "r": 0.35, "len": 1.2 }
+  ]
+}

@@ -1,0 +1,12 @@
+[package]
+name = "ship_web"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+ship_core = { path = "../ship_core" }
+
+[lib]
+crate-type = ["cdylib", "rlib"]

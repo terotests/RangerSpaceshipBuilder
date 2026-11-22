@@ -1,0 +1,19 @@
+{
+  "format": "ranger-ship",
+  "version": 1,
+  "name": "Kipinä",
+  "class": "fighter",
+  "length": 14,
+  "seed": 7,
+  "palette": { "hull": "#d7dbe0", "accent": "#e63946", "dark": "#2f343b", "glow": "#5ad1ff", "glass": "#7fd8ff" },
+  "parts": [
+    { "name": "runko", "type": "hull", "sides": 10, "smooth": 2, "belly": 0.6, "panel": 0.1,
+      "sections": [[-2.2, 0.9, 0.5, 3], [-1.2, 1.1, 0.6, 3], [0.4, 0.9, 0.55, 2.6], [1.8, 0.45, 0.32, 2.2], [2.9, 0.02, 0.02, 2]],
+      "bands": [1] },
+    { "name": "ohjaamo", "type": "cockpit", "at": [0, 0.24, 0.7], "size": [0.42, 0.34, 1.2] },
+    { "name": "siivet", "type": "wing", "at": [0.35, -0.05, -0.6], "mirror": true, "span": 1.9, "root": 1.7, "tip": 0.45, "sweep": 1.1, "thick": 0.12, "dihedral": -4, "tipBand": 0.18 },
+    { "name": "pyrstö", "type": "wing", "at": [0, 0.2, -1.6], "rot": [0, 0, 90], "span": 0.8, "root": 0.9, "tip": 0.35, "sweep": 0.6, "thick": 0.08, "tipBand": 0.3 },
+    { "name": "moottorit", "type": "engine", "at": [0.32, 0, -2.25], "mirror": true, "r": 0.22, "len": 1.0 },
+    { "name": "tykit", "type": "cylinder", "at": [1.25, -0.08, 0.1], "mirror": true, "r": 0.035, "len": 1.4, "sides": 6, "color": "dark" }
+  ]
+}

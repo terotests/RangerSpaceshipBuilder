@@ -1,0 +1,18 @@
+{
+  "format": "ranger-ship", "version": 1, "order": 4,
+  "name": "Muuli", "class": "corvette", "length": 70, "seed": 3,
+  "palette": { "hull": "#e8b23a", "accent": "#333a44", "dark": "#2a2f36", "glow": "#7ee0ff", "glass": "#8fe3ff", "c1": "#c2463d", "c2": "#3d7cc2", "c3": "#4a9c5d" },
+  "parts": [
+    { "name": "ohjaamo", "type": "box", "at": [0, 0.2, 3.2], "size": [1.6, 1.2, 1.6], "taper": [0.8, 0.6], "lift": -0.15, "bevel": 0.2 },
+    { "name": "ikkunat", "type": "box", "at": [0, 0.42, 4.0], "size": [1.0, 0.18, 0.05], "rot": [-28, 0, 0], "color": "glass", "glow": true },
+    { "name": "selkäranka", "type": "truss", "at": [0, 0, -0.6], "len": 6.6, "width": 0.5, "segments": 9, "thick": 0.06, "color": "accent" },
+    { "name": "kontit A", "type": "box", "at": [0.55, 0.3, 1.6], "mirror": true, "size": [0.6, 0.6, 1.3], "color": "c1", "panel": 0.05, "repeat": { "count": 4, "step": [0, 0, -1.4] } },
+    { "name": "kontit B", "type": "box", "at": [0.55, -0.3, 1.6], "mirror": true, "size": [0.6, 0.6, 1.3], "color": "c2", "panel": 0.05, "repeat": { "count": 4, "step": [0, 0, -1.4] } },
+    { "name": "kontit ylä", "type": "box", "at": [0, 0.6, 0.9], "size": [0.6, 0.6, 1.3], "color": "c3", "panel": 0.05, "repeat": { "count": 3, "step": [0, 0, -1.4] } },
+    { "name": "moottoriosa", "type": "box", "at": [0, 0, -4.3], "size": [1.8, 1.3, 1.2], "bevel": 0.25, "taper": [0.85, 0.85] },
+    { "name": "moottorit", "type": "engine", "at": [0.5, 0, -5.2], "mirror": true, "r": 0.38, "len": 1.0 },
+    { "name": "keskimoottori", "type": "engine", "at": [0, 0.35, -5.1], "r": 0.26, "len": 0.8 },
+    { "name": "antenni", "type": "dish", "at": [0, 0.95, 3.0], "rot": [-70, 0, 0], "r": 0.3, "depth": 0.3 },
+    { "name": "valot", "type": "cylinder", "at": [0.85, 0, -3.8], "mirror": true, "r": 0.05, "len": 0.05, "sides": 6, "color": "glow", "glow": true }
+  ]
+}
