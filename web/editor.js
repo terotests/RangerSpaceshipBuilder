@@ -2,8 +2,8 @@
 // The ship editor: a recipe (.ship.json) on the left and right, the ship
 // built by ship_core (WebAssembly) in the middle.
 
-import { View3D } from "./view3d.js";
-import { TYPES, COMMON, REPEAT, CLASSES, newPart } from "./schema.js";
+import { View3D, LIGHTS } from "./view3d.js";
+import { TYPES, COMMON, REPEAT, CLASSES, PATTERNS, MATERIAL_PARAMS, newPart } from "./schema.js";
 import { zip } from "./zip.js";
 
 const $ = (id) => document.getElementById(id);
@@ -40,12 +40,36 @@ function build(recipe) {
   wasm.ship_free(p, text.length);
   const info = JSON.parse(new TextDecoder().decode(new Uint8Array(wasm.memory.buffer, wasm.ship_info_ptr(), wasm.ship_info_len())));
   const mesh = new Float32Array(wasm.memory.buffer, wasm.ship_mesh_ptr(), wasm.ship_mesh_len()).slice();
-  return { info, mesh };
+  const r = new Uint32Array(wasm.memory.buffer, wasm.ship_ranges_ptr(), wasm.ship_ranges_len());
+  const ranges = [];
+  for (let i = 0; i < r.length; i += 2) ranges.push([r[i], r[i + 1]]);
+  return { info, mesh, ranges };
 }
 
-function glbOf(recipe) {
+/// The materials of the recipe just built, with their GL textures (made by
+/// ship_core once per material definition and kept).
+function materialsOf(recipe, info) {
+  const obj = typeof recipe === "string" ? JSON.parse(recipe) : recipe;
+  return info.materials.map((m, i) => {
+    const key = JSON.stringify([m.name, m.pattern, (obj.materials || {})[m.name] || null, info.textureSize]);
+    const tex = view.materialTex(key, () => {
+      const size = wasm.ship_tex(i);
+      if (!size) return null;
+      return { size, data: new Uint8Array(wasm.memory.buffer, wasm.ship_tex_ptr(), size * size * 9).slice() };
+    });
+    return { ...m, tex };
+  });
+}
+
+/// A built ship as the viewer wants it.
+function meshOf(recipe, extra) {
+  const b = build(recipe);
+  return { b, item: { data: b.mesh, ranges: b.ranges, mats: materialsOf(recipe, b.info), ...extra } };
+}
+
+function glbOf(recipe, textures) {
   build(recipe);
-  const n = wasm.ship_glb();
+  const n = wasm.ship_glb(textures ? 1 : 0);
   return new Uint8Array(wasm.memory.buffer, wasm.ship_glb_ptr(), n).slice();
 }
 
@@ -136,9 +160,9 @@ function load(ship) {
 function rebuild(frame) {
   if ($("chkLineup").checked) { lineup(); return; }
   const t0 = performance.now();
-  const b = build(recipe);
+  const { b, item } = meshOf(recipe);
   lastBuilt = b;
-  view.setMeshes([{ data: b.mesh }]);
+  view.setMeshes([item]);
   view.selected = selected;
   if (frame) view.frame(b.info.min, b.info.max);
   const ms = (performance.now() - t0).toFixed(1);
@@ -157,9 +181,9 @@ function rebuild(frame) {
 function lineup() {
   const ships = allShips().map((s) => {
     const r = s.id === current.id ? recipe : s.recipe;
-    const b = build(r);
+    const { b, item } = meshOf(r);
     const len = Math.max(0.001, b.info.max[2] - b.info.min[2]);
-    return { name: r.name, length: r.length || 10, b, k: (r.length || 10) / len };
+    return { name: r.name, length: r.length || 10, b, item, k: (r.length || 10) / len };
   }).sort((a, b) => a.length - b.length);
   let x = 0;
   const items = [];
@@ -167,7 +191,7 @@ function lineup() {
   for (const s of ships) {
     const w = (s.b.info.max[0] - s.b.info.min[0]) * s.k;
     const cx = x + w / 2 - ((s.b.info.max[0] + s.b.info.min[0]) / 2) * s.k;
-    items.push({ data: s.b.mesh, scale: s.k, offset: [cx, -s.b.info.min[1] * s.k, -((s.b.info.max[2] + s.b.info.min[2]) / 2) * s.k] });
+    items.push({ ...s.item, scale: s.k, offset: [cx, -s.b.info.min[1] * s.k, -((s.b.info.max[2] + s.b.info.min[2]) / 2) * s.k] });
     x += w + Math.max(5, s.length * 0.08);
     maxH = Math.max(maxH, (s.b.info.max[1] - s.b.info.min[1]) * s.k, s.length);
   }
@@ -292,6 +316,49 @@ function colorField(d, obj, set) {
   return field(d.label, el("span", { class: "ctl" }, sel, pick), true);
 }
 
+/// A material: the default, a built-in pattern or one of the recipe's own.
+function materialField(d, obj, set, defaultLabel) {
+  const sel = el("select", { onchange: () => set(sel.value || undefined) });
+  sel.append(el("option", { value: "" }, defaultLabel || "(oletus)"));
+  const own = Object.keys(recipe.materials || {});
+  if (own.length) {
+    const g = el("optgroup", { label: "Omat" });
+    for (const k of own) g.append(el("option", { value: k, selected: obj[d.key] === k }, k));
+    sel.append(g);
+  }
+  const g2 = el("optgroup", { label: "Valmiit" });
+  for (const [k, label] of PATTERNS) g2.append(el("option", { value: k, selected: obj[d.key] === k }, label));
+  sel.append(g2);
+  return field(d.label, sel, true);
+}
+
+function renderMaterials() {
+  const box = $("matProps");
+  box.innerHTML = "";
+  box.append(materialField({ key: "material", label: "Oletus" }, recipe, (v) => { const r = clone(recipe); setParam(r, "material", v); commit(r); }, "(osan mukaan)"));
+  const mats = recipe.materials || {};
+  for (const name of Object.keys(mats)) {
+    const m = mats[name];
+    const g = el("div", { class: "group" });
+    const pat = el("select", { onchange: () => { const r = clone(recipe); r.materials[name].pattern = pat.value; commit(r); } });
+    for (const [k, label] of PATTERNS) pat.append(el("option", { value: k, selected: (m.pattern || "plates") === k }, label));
+    g.append(el("h3", {}, name, " ", el("button", { title: "Poista materiaali", onclick: () => {
+      const r = clone(recipe); delete r.materials[name]; if (!Object.keys(r.materials).length) delete r.materials; commit(r);
+    } }, "×")));
+    g.append(field("Kuvio", pat, true));
+    for (const d of MATERIAL_PARAMS) g.append(paramField(d, (r) => r.materials[name], (r, k, v) => setParam(r.materials[name], k, v)));
+    box.append(g);
+  }
+  box.append(el("div", { class: "row" }, el("button", { onclick: () => {
+    const r = clone(recipe);
+    r.materials = r.materials || {};
+    let i = 1;
+    while (r.materials["materiaali" + i]) i++;
+    r.materials["materiaali" + i] = { pattern: "plates", scale: 1, metal: 0.6, rough: 0.4, grime: 0.3 };
+    commit(r);
+  } }, "+ Oma materiaali")));
+}
+
 function tableField(d, obj, set, cols) {
   const rows = clone(obj[d.key] ?? d.def);
   const wrap = el("div", { class: "field wide" }, el("label", { class: "plain" }, d.label));
@@ -341,6 +408,7 @@ function paramField(d, getObj, onSet) {
     case "bool": return field(d.label, el("input", { type: "checkbox", checked: !!(obj[d.key] ?? d.def), onchange: (e) => commitPart(d.key, e.target.checked) }), true);
     case "text": return field(d.label, el("input", { type: "text", value: obj[d.key] ?? "", oninput: (e) => set(e.target.value) }), true);
     case "color": return colorField(d, obj, set);
+    case "material": return materialField(d, obj, (v) => { const r = clone(recipe); setParam(r.parts[selected], d.key, v); commit(r); });
     case "sections": return tableField(d, obj, set, ["z", "lev.", "kork.", "pyör.", "dy"]);
     case "path": return tableField(d, obj, set, ["x", "y", "z"]);
     case "intlist": return field(d.label, el("input", { type: "text", value: (obj[d.key] || []).join(", "), onchange: (e) => {
@@ -408,7 +476,7 @@ function packFiles(ships) {
   for (const s of ships) {
     const id = s.id;
     const b = build(s.recipe);
-    const glb = glbOf(s.recipe);
+    const glb = glbOf(s.recipe, $("chkPackTex").checked);
     const size = [0, 1, 2].map((k) => b.info.max[k] - b.info.min[k]);
     const center = [0, 1, 2].map((k) => (b.info.max[k] + b.info.min[k]) / 2);
     entries.push({ id, name: s.recipe.name, class: s.recipe.class, length: s.recipe.length, model: id + ".glb", recipe: id + ".ship.json",
@@ -443,6 +511,7 @@ function refresh(frame) {
   if (selected >= recipe.parts.length) selected = recipe.parts.length - 1;
   renderShipSelect();
   renderShipProps();
+  renderMaterials();
   renderParts();
   renderInspector();
   syncJson();
@@ -474,8 +543,13 @@ function wire() {
   $("btnUndo").onclick = undo;
   $("btnRedo").onclick = redo;
   $("chkLineup").onchange = () => rebuild(true);
+  const lights = $("lightSelect");
+  for (const k in LIGHTS) lights.append(el("option", { value: k }, LIGHTS[k].label));
+  lights.onchange = () => view.setLights(lights.value);
+  $("chkSpin").onchange = (e) => { view.lightSpin = e.target.checked; };
+  $("chkTex").onchange = (e) => { view.textures = e.target.checked; view.dirty = true; };
   $("btnRecipe").onclick = () => download(slug(recipe.name) + ".ship.json", pretty(recipe) + "\n", "application/json");
-  $("btnGlb").onclick = () => download(slug(recipe.name) + ".glb", glbOf(recipe), "model/gltf-binary");
+  $("btnGlb").onclick = () => download(slug(recipe.name) + ".glb", glbOf(recipe, true), "model/gltf-binary");
   $("btnPack").onclick = () => {
     const ships = allShips().map((s) => ({ id: s.preset ? s.id : slug(s.id), recipe: s.id === current.id ? recipe : s.recipe }));
     download("ships.zip", zip(packFiles(ships)));

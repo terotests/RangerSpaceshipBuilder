@@ -99,11 +99,18 @@ pub struct Mesh {
     pub col: Vec<double>,
     pub glow: Vec<bool>,
     pub part: Vec<int>,
+    /// 9 numbers a triangle: the corners in the part's own frame (textures
+    /// are projected from these, so they move and turn with the part)
+    pub lpos: Vec<double>,
+    /// 6 numbers a triangle: texture coordinates (filled by `recipe`)
+    pub uv: Vec<double>,
+    /// the material of each triangle (an index into the ship's materials)
+    pub mat: Vec<int>,
 }
 
 impl Mesh {
     pub fn new() -> Mesh {
-        Mesh { pos: Vec::new(), col: Vec::new(), glow: Vec::new(), part: Vec::new() }
+        Mesh { pos: Vec::new(), col: Vec::new(), glow: Vec::new(), part: Vec::new(), lpos: Vec::new(), uv: Vec::new(), mat: Vec::new() }
     }
 
     pub fn count(&self) -> int {
@@ -141,6 +148,23 @@ impl Mesh {
         self.col.push(col.b);
         self.glow.push(glow);
         self.part.push(0);
+        let mut k: int = 0;
+        while k < 9 {
+            let v = self.pos[self.pos.len() - 9 + (k as usize)];
+            self.lpos.push(v);
+            k += 1;
+        }
+        k = 0;
+        while k < 6 {
+            self.uv.push(0.0);
+            k += 1;
+        }
+        self.mat.push(0);
+    }
+
+    pub fn local(&self, t: int, k: int) -> V3 {
+        let i = (t * 9 + k * 3) as usize;
+        V3::new(self.lpos[i], self.lpos[i + 1], self.lpos[i + 2])
     }
 
     pub fn quad(&mut self, a: V3, b: V3, c: V3, d: V3, col: Rgb, glow: bool) {
@@ -148,9 +172,10 @@ impl Mesh {
         self.tri(a, c, d, col, glow);
     }
 
-    /// Copies `src` in, placed by `x`, every triangle marked as part `part`.
-    /// A mirroring placement turns the triangles round so they still face out.
-    pub fn append(&mut self, src: &Mesh, x: Xform, part: int) {
+    /// Copies `src` in, placed by `x`, every triangle marked as part `part`
+    /// and material `mat`. A mirroring placement turns the triangles round so
+    /// they still face out. The corners in `src`'s frame are kept (`lpos`).
+    pub fn append(&mut self, src: &Mesh, x: Xform, part: int, mat: int) {
         let flip = x.m.det() < 0.0;
         let n = src.count();
         let mut t: int = 0;
@@ -169,6 +194,20 @@ impl Mesh {
             if self.count() > before {
                 let last = self.part.len() - 1;
                 self.part[last] = part;
+                self.mat[last] = mat;
+                let l0 = src.local(t, 0);
+                let l1 = if flip { src.local(t, 2) } else { src.local(t, 1) };
+                let l2 = if flip { src.local(t, 1) } else { src.local(t, 2) };
+                let li = last * 9;
+                let ls = vec![l0, l1, l2];
+                let mut k: int = 0;
+                while k < 3 {
+                    let q = ls[k as usize];
+                    self.lpos[li + (k as usize) * 3] = q.x;
+                    self.lpos[li + (k as usize) * 3 + 1] = q.y;
+                    self.lpos[li + (k as usize) * 3 + 2] = q.z;
+                    k += 1;
+                }
             }
             t += 1;
         }

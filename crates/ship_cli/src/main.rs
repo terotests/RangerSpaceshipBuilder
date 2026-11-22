@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 //! The ship tool:
 //!
-//!   ship glb <recipe.ship.json> [out.glb]   one ship as a .glb
+//!   ship glb <recipe.ship.json> [out.glb]   one ship as a .glb (--textures: with PNG maps)
 //!   ship info <recipe.ship.json>...         triangles, size, warnings
-//!   ship pack <dir> <out>                   every *.ship.json in <dir> as a ship pack:
+//!   ship textures <out>                     the built-in materials' maps as PNG files
+//!   ship pack <dir> <out> [--textures]      every *.ship.json in <dir> as a ship pack:
 //!                                           <out>/ships.json (+ ships.ts), <id>.glb, <id>.ship.json
 //!
 //! A ship pack is what RangerGames reads (docs/format.md): copy <out> into a
@@ -41,14 +42,16 @@ fn recipes(dir: &Path) -> Vec<std::path::PathBuf> {
 }
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
+    let all: Vec<String> = std::env::args().collect();
+    let textures = all.iter().any(|a| a == "--textures");
+    let args: Vec<String> = all.into_iter().filter(|a| a != "--textures").collect();
     let cmd = args.get(1).map(|s| s.as_str()).unwrap_or("");
     match cmd {
         "glb" if args.len() >= 3 => {
             let src = Path::new(&args[2]);
             let out = args.get(3).cloned().unwrap_or_else(|| format!("{}.glb", id_of(src)));
             let ship = build(src);
-            fs::write(&out, ship_core::gltf::write_glb(&ship)).unwrap();
+            fs::write(&out, ship_core::gltf::write_glb_with(&ship, textures)).unwrap();
             println!("{} -> {} ({} triangles)", src.display(), out, ship.mesh.count());
         }
         "info" if args.len() >= 3 => {
@@ -68,7 +71,7 @@ fn main() {
             for f in recipes(dir) {
                 let id = id_of(&f);
                 let ship = build(&f);
-                let glb = ship_core::gltf::write_glb(&ship);
+                let glb = ship_core::gltf::write_glb_with(&ship, textures);
                 fs::write(out.join(format!("{}.glb", id)), &glb).unwrap();
                 fs::copy(&f, out.join(format!("{}.ship.json", id))).unwrap();
                 let b = ship.mesh.bounds();
@@ -94,8 +97,21 @@ fn main() {
             fs::write(out.join("ships.ts"), module).unwrap();
             println!("{} ships -> {}", entries.len(), out.display());
         }
+        "textures" if args.len() >= 3 => {
+            // every built-in material's maps as PNG files, to look at
+            let out = Path::new(&args[2]);
+            fs::create_dir_all(out).unwrap();
+            for name in ship_core::material::PATTERNS.split(' ') {
+                let m = ship_core::material::builtin(name);
+                let set = ship_core::texture::generate(&m, 256);
+                for (kind, data) in [("base", &set.base), ("orm", &set.orm), ("normal", &set.normal)] {
+                    fs::write(out.join(format!("{}_{}.png", name, kind)), ship_core::png::write_rgb(set.size, set.size, data)).unwrap();
+                }
+            }
+            println!("{} materials -> {}", ship_core::material::PATTERNS.split(' ').count(), out.display());
+        }
         _ => {
-            eprintln!("usage:\n  ship glb <recipe.ship.json> [out.glb]\n  ship info <recipe.ship.json|dir>...\n  ship pack <dir> <out>");
+            eprintln!("usage:\n  ship glb <recipe.ship.json> [out.glb]\n  ship info <recipe.ship.json|dir>...\n  ship pack <dir> <out> [--textures]\n  ship textures <out>");
             std::process::exit(2);
         }
     }

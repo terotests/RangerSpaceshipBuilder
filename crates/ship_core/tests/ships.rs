@@ -54,3 +54,31 @@ fn bad_json_is_an_error() {
     let ship = recipe::build("{\"parts\": [{\"type\": \"banana\"}]}");
     assert_eq!(ship.warnings.len(), 1);
 }
+
+#[test]
+fn textured_glb_has_images() {
+    let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/../../ships/kipina.ship.json");
+    let ship = recipe::build(&fs::read_to_string(dir).unwrap());
+    let glb = gltf::write_glb_with(&ship, true);
+    let jlen = u32::from_le_bytes([glb[12], glb[13], glb[14], glb[15]]) as usize;
+    let json = std::str::from_utf8(&glb[20..20 + jlen]).unwrap();
+    assert!(json.contains("\"normalTexture\""));
+    assert!(json.contains("image/png"));
+    let png = ship_core::png::write_rgb(2, 1, &vec![255, 0, 0, 0, 255, 0]);
+    assert_eq!(&png[0..8], &[137, 80, 78, 71, 13, 10, 26, 10]);
+}
+
+#[test]
+fn every_pattern_tiles() {
+    // the left and right columns (and top and bottom rows) of each map are
+    // neighbours when the texture repeats: they must be close
+    for name in ship_core::material::PATTERNS.split(' ') {
+        let set = ship_core::texture::generate(&ship_core::material::builtin(name), 64);
+        let n = 64usize;
+        let mut diff = 0i64;
+        for y in 0..n {
+            diff += (set.base[(y * n) * 3] as i64 - set.base[(y * n + n - 1) * 3] as i64).abs();
+        }
+        assert!(diff / (n as i64) < 40, "{}: seam {}", name, diff / n as i64);
+    }
+}

@@ -22,6 +22,12 @@ värit kärkipisteissä (`COLOR_0`), moottorien liekit ja ikkunat omana
 valaisemattomana materiaalinaan (`KHR_materials_unlit`). Sama tiedosto aukeaa
 Blenderissä ja three.js:ssä. Tarkemmin: [docs/format.md](docs/format.md).
 
+Pinnoille tulee **proseduraaliset materiaalit** (paneelit, panssari, heksat,
+orgaaninen, hiilikuitu, aurinkokennot, ritilät, lasi, maali,
+varoitusraidat): saumattomat väri-, metalli/karheus- ja normaalikartat, jotka
+ship_core generoi. Editorissa on viisi valaistusta (aurinko, punainen
+jättiläinen, sumu, telakka, vastavalo) ja valo, joka kiertää aluksen.
+
 Keula osoittaa **+z**, ylös on **+y**; reseptin `length` kertoo aluksen
 oikean pituuden metreinä.
 
@@ -47,8 +53,8 @@ kokosuhteissa.
 | --- | --- |
 | `crates/ship_core` | Resepti → mesh → `.glb`, **Rangerin Rust-osajoukolla** (`use ranger::prelude::*`): cargo kääntää sen natiivina ja WebAssemblynä, ja `rgrc` kirjoittaa saman lähteen JavaScriptiksi, C++:ksi, Go:ksi, Pythoniksi … (esim. puhelimeen tai peliin, joka rakentaa aluksia itse) |
 | `crates/ship_web` | ship_core WebAssemblynä C ABI:n takana editorille |
-| `crates/ship_cli` | `ship glb`, `ship info`, `ship pack` |
-| `web/` | Editori: osalista, ominaisuudet, JSON-näkymä, WebGL-näkymä (valinta napauttamalla), kumoa/tee uudelleen, omat alukset selaimen muistiin, lataukset (resepti, .glb, paketti .zip) |
+| `crates/ship_cli` | `ship glb [--textures]`, `ship info`, `ship pack [--textures]`, `ship textures` (materiaalien kartat PNG:ksi) |
+| `web/` | Editori: osalista, materiaalit, ominaisuudet, JSON-näkymä, WebGL-näkymä (PBR-varjostus, valaistukset, valinta napauttamalla), kumoa/tee uudelleen, omat alukset selaimen muistiin, lataukset (resepti, .glb, paketti .zip) |
 | `ships/` | Valmiit alukset |
 
 ## Aloitus
@@ -64,7 +70,7 @@ Testit:
 
 ```sh
 cargo test --workspace                      # alukset rakentuvat, kolmiobudjetti, glb kunnossa
-bash scripts/check-ranger.sh                # ship_core Rangerin osajoukossa + JS tekee saman glb:n
+bash scripts/check-ranger.sh                # ship_core Rangerin osajoukossa + JS tekee saman glb:n ja samat PNG:t
 TARGETS="es6 cpp go python" bash scripts/check-ranger.sh
 ```
 

@@ -286,7 +286,7 @@ fn hull(p: &Params, out: &mut Mesh) {
             t += 1;
         }
     }
-    out.append(&solid, crate::math::Xform::identity(), 0);
+    out.append(&solid, crate::math::Xform::identity(), 0, 0);
     // greebles and windows on the skin
     let greebles = p.int("greebles", 0, 0, 400);
     let windows = p.int("windows", 0, 0, 400);
@@ -510,12 +510,12 @@ fn turret(p: &Params, out: &mut Mesh) {
     loft(&mut tmp, &base, &bands, dark, dark, false, &mut shade);
     // the cylinder was built along z: stand it up
     let up = crate::math::Xform::new(crate::math::M3::rot_x(-90.0), V3::zero());
-    out.append(&tmp, up, 0);
+    out.append(&tmp, up, 0, 0);
     // the head
     let head = Mesh::new();
     let mut hm = head;
     tapered_box(&mut hm, V3::new(r * 1.4, r * 0.6, r * 1.6), 0.8, 0.7, 0.0, 0.15, paint, &mut shade);
-    out.append(&hm, crate::math::Xform::new(crate::math::M3::identity(), V3::new(0.0, r * 0.55, 0.0)), 0);
+    out.append(&hm, crate::math::Xform::new(crate::math::M3::identity(), V3::new(0.0, r * 0.55, 0.0)), 0, 0);
     // the barrels
     let gap = r * 0.35;
     let mut b: int = 0;
@@ -525,7 +525,7 @@ fn turret(p: &Params, out: &mut Mesh) {
         let mut bm = Mesh::new();
         let bb = vec![dark, dark, dark];
         loft(&mut bm, &rings, &bb, dark, dark, false, &mut shade);
-        out.append(&bm, crate::math::Xform::new(crate::math::M3::identity(), V3::new(x, r * 0.55, 0.0)), 0);
+        out.append(&bm, crate::math::Xform::new(crate::math::M3::identity(), V3::new(x, r * 0.55, 0.0)), 0, 0);
         b += 1;
     }
 }
@@ -617,7 +617,7 @@ fn panel(p: &Params, out: &mut Mesh) {
             let z = -l * 0.5 + gap + (cl + gap) * (k as double) + cl * 0.5;
             let mut c = Mesh::new();
             tapered_box(&mut c, V3::new(cw, thick, cl), 1.0, 1.0, 0.0, 0.0, cell, &mut shade);
-            out.append(&c, crate::math::Xform::new(crate::math::M3::identity(), V3::new(x, 0.0, z)), 0);
+            out.append(&c, crate::math::Xform::new(crate::math::M3::identity(), V3::new(x, 0.0, z)), 0, 0);
             k += 1;
         }
         i += 1;

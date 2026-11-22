@@ -31,6 +31,7 @@
 //! how long the ship is in metres (the game scales it).
 
 use crate::json::{Json, JsonReader};
+use crate::material::{default_for, resolve, Material};
 use crate::math::{M3, V3, Xform};
 use crate::mesh::{parse_hex, Mesh};
 use crate::parts::{build_part, Params, Swatch};
@@ -48,12 +49,29 @@ pub struct Ship {
     pub error: string,
     pub warnings: Vec<string>,
     pub part_count: int,
+    /// the materials the parts use, in the order of the triangles' `mat`
+    pub materials: Vec<Material>,
+    /// the texture size in pixels (a power of two)
+    pub texture_size: int,
 }
 
 impl Ship {
     /// A short JSON summary: name, class, length, triangles, bounds, warnings.
     pub fn info(&self) -> string {
         let b = self.mesh.bounds();
+        let mut mats = String::new();
+        for (i, m) in self.materials.iter().enumerate() {
+            if i > 0 {
+                mats.push(',');
+            }
+            mats.push_str(&format!(
+                "{{\"name\":{},\"pattern\":{},\"metal\":{},\"rough\":{}}}",
+                crate::json::quote(&m.name),
+                crate::json::quote(&m.pattern),
+                crate::json::num(m.metal),
+                crate::json::num(m.rough)
+            ));
+        }
         let mut w = String::new();
         for (i, s) in self.warnings.iter().enumerate() {
             if i > 0 {
@@ -62,7 +80,7 @@ impl Ship {
             w.push_str(&crate::json::quote(s));
         }
         format!(
-            "{{\"name\":{},\"class\":{},\"length\":{},\"triangles\":{},\"parts\":{},\"min\":[{},{},{}],\"max\":[{},{},{}],\"error\":{},\"warnings\":[{}]}}",
+            "{{\"name\":{},\"class\":{},\"length\":{},\"triangles\":{},\"parts\":{},\"min\":[{},{},{}],\"max\":[{},{},{}],\"error\":{},\"warnings\":[{}],\"materials\":[{}],\"textureSize\":{}}}",
             crate::json::quote(&self.name),
             crate::json::quote(&self.class),
             crate::json::num(self.length),
@@ -75,7 +93,9 @@ impl Ship {
             crate::json::num(b[1].y),
             crate::json::num(b[1].z),
             crate::json::quote(&self.error),
-            w
+            w,
+            mats,
+            self.texture_size
         )
     }
 }
@@ -126,6 +146,8 @@ pub fn build(text: &str) -> Ship {
         error: reader.error.clone(),
         warnings: Vec::new(),
         part_count: 0,
+        materials: Vec::new(),
+        texture_size: 256,
     };
     if !ship.error.is_empty() {
         return ship;
@@ -148,6 +170,19 @@ pub fn build(text: &str) -> Ship {
         if !build_part(&kind, &params, &mut local) {
             ship.warnings.push(format!("part {}: unknown type \"{}\"", index, kind));
             continue;
+        }
+        // textures are projected in the part's own frame
+        local.lpos = local.pos.clone();
+        let mat_name = part.get("material").str_or(&recipe.get("material").str_or(&default_for(&kind)));
+        let mut mat: int = -1;
+        for (mi, m) in ship.materials.iter().enumerate() {
+            if m.name == mat_name {
+                mat = mi as int;
+            }
+        }
+        if mat < 0 {
+            ship.materials.push(resolve(&recipe, &mat_name));
+            mat = (ship.materials.len() as int) - 1;
         }
         // the part's own placement: scale, turn, move
         let scale = v3_of(&part.get("scale"), V3::new(1.0, 1.0, 1.0));
@@ -173,13 +208,62 @@ pub fn build(text: &str) -> Ship {
             let g = grow.powf(kf);
             let copy = Xform::new(M3::euler(turn.mul(kf)).mul(M3::scale(V3::new(g, g, g))), step.mul(kf));
             let x = copy.then(place);
-            ship.mesh.append(&local, x, index as int);
+            ship.mesh.append(&local, x, index as int, mat);
             if mirror {
                 let m = Xform::new(M3::scale(V3::new(-1.0, 1.0, 1.0)), V3::zero()).then(x);
-                ship.mesh.append(&local, m, index as int);
+                ship.mesh.append(&local, m, index as int, mat);
             }
             k += 1;
         }
     }
+    let ts = recipe.get("textureSize").num_or(256.0) as int;
+    ship.texture_size = if ts <= 64 { 64 } else if ts <= 128 { 128 } else if ts <= 256 { 256 } else if ts <= 512 { 512 } else { 1024 };
+    project_uvs(&mut ship);
     ship
+}
+
+/// Texture coordinates: each triangle projected along the axis its face
+/// mostly points to, in its part's frame. One tile is about 2.5 m on a small
+/// ship and a fourteenth of a big ship's length, times the material's scale.
+fn project_uvs(ship: &mut Ship) {
+    let b = ship.mesh.bounds();
+    let model_len = (b[1].z - b[0].z).max(0.001);
+    let metres = if ship.length > 0.0 { ship.length } else { 20.0 };
+    let tile_m = (metres / 14.0).max(2.5);
+    let tile = tile_m * model_len / metres;
+    let n = ship.mesh.count();
+    let mut t: int = 0;
+    while t < n {
+        let a = ship.mesh.local(t, 0);
+        let bb = ship.mesh.local(t, 1);
+        let c = ship.mesh.local(t, 2);
+        let nr = bb.sub(a).cross(c.sub(a)).norm();
+        // rounded, so faces at exactly 45° pick the same axis on every
+        // target (sin and cos may differ in the last bit)
+        let ax = (nr.x.abs() * 10000.0).round();
+        let ay = (nr.y.abs() * 10000.0).round();
+        let az = (nr.z.abs() * 10000.0).round();
+        let mi = ship.mesh.mat[t as usize];
+        let scale = if mi >= 0 && (mi as usize) < ship.materials.len() { ship.materials[mi as usize].scale } else { 1.0 };
+        let k = 1.0 / (tile * scale);
+        let corners = vec![a, bb, c];
+        let mut j: int = 0;
+        while j < 3 {
+            let q = corners[j as usize];
+            let mut u = q.x;
+            let mut v = q.y;
+            if ax >= ay && ax >= az {
+                u = q.z;
+                v = q.y;
+            } else if ay >= az {
+                u = q.x;
+                v = q.z;
+            }
+            let i = (t * 6 + j * 2) as usize;
+            ship.mesh.uv[i] = u * k;
+            ship.mesh.uv[i + 1] = -v * k;
+            j += 1;
+        }
+        t += 1;
+    }
 }

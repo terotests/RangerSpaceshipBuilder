@@ -1,15 +1,16 @@
 {
   "format": "ranger-ship", "version": 1, "order": 2,
   "name": "Sirppi", "class": "fighter", "length": 17, "seed": 21,
+  "materials": {"kuitu": {"pattern": "carbon", "scale": 0.25, "metal": 0.15, "rough": 0.25}},
   "palette": { "hull": "#2d3e66", "accent": "#ff9f1c", "dark": "#1b2133", "glow": "#ffb347", "glass": "#ffd27a" },
   "parts": [
-    { "name": "runko", "type": "hull", "sides": 8, "smooth": 2, "belly": 0.5, "panel": 0.14,
+    { "name": "runko", "material": "plates", "type": "hull", "sides": 8, "smooth": 2, "belly": 0.5, "panel": 0.14,
       "sections": [[-2.4, 0.7, 0.55, 2.4], [-1.2, 1.0, 0.7, 2.6], [0.6, 0.8, 0.6, 2.4], [2.0, 0.35, 0.3, 2], [3.0, 0.02, 0.02, 2, -0.1]],
       "bands": [2] },
     { "name": "ohjaamo", "type": "cockpit", "at": [0, 0.26, 0.9], "size": [0.4, 0.3, 1.0] },
-    { "name": "sirppisiivet", "type": "wing", "at": [0.4, 0, -1.6], "mirror": true, "span": 2.4, "root": 1.4, "tip": 0.35, "sweep": -1.6, "thick": 0.14, "dihedral": 6, "tipBand": 0.22 },
+    { "name": "sirppisiivet", "material": "kuitu", "type": "wing", "at": [0.4, 0, -1.6], "mirror": true, "span": 2.4, "root": 1.4, "tip": 0.35, "sweep": -1.6, "thick": 0.14, "dihedral": 6, "tipBand": 0.22 },
     { "name": "kärkipiikit", "type": "spike", "mirror": true, "path": [[2.75, 0.25, 0.1], [2.85, 0.3, 0.8], [2.7, 0.3, 1.5]], "r0": 0.09, "r1": 0.01, "sides": 6, "color": "accent" },
-    { "name": "evät", "type": "wing", "at": [0.35, 0.2, -1.9], "mirror": true, "rot": [0, 0, 62], "span": 0.8, "root": 0.8, "tip": 0.3, "sweep": 0.5, "thick": 0.07 },
+    { "name": "evät", "material": "kuitu", "type": "wing", "at": [0.35, 0.2, -1.9], "mirror": true, "rot": [0, 0, 62], "span": 0.8, "root": 0.8, "tip": 0.3, "sweep": 0.5, "thick": 0.07 },
     { "name": "moottori", "type": "engine", "at": [0, 0, -2.6], "r": 0.34, "len": 1.0, "nozzle": 1.25 },
     { "name": "sivumoottorit", "type": "engine", "at": [0.75, -0.05, -2.2], "mirror": true, "r": 0.16, "len": 0.8 },
     { "name": "tykki", "type": "cylinder", "at": [0, -0.22, 1.6], "r": 0.05, "len": 1.4, "sides": 6, "color": "dark" }

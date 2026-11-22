@@ -27,4 +27,17 @@ for (const f of fs.readdirSync(dir).filter((f) => f.endsWith(".ship.json")).sort
   if (!ok) bad++;
   console.log(`${ok ? "ok  " : "FAIL"} ${f} (${rs.length} bytes, largest float difference ${worst})`);
 }
+// the textures: the same PNG bytes from both builds
+const tmp = path.join(root, "target/parity-tex");
+execFileSync(path.join(root, "target/release/ship"), ["textures", tmp]);
+for (const name of m.RsMod_material.PATTERNS().split(" ")) {
+  const set = m.Texture.generate(m.RsMod_material.builtin(name), 256);
+  for (const [kind, data] of [["base", set.base], ["orm", set.orm], ["normal", set.normal]]) {
+    const js = Buffer.from(m.Png.write_rgb(256, 256, data));
+    const rs = fs.readFileSync(path.join(tmp, `${name}_${kind}.png`));
+    const ok = js.equals(rs);
+    if (!ok) bad++;
+    if (!ok || kind === "base") console.log(`${ok ? "ok  " : "FAIL"} texture ${name}_${kind}.png (${rs.length} bytes)`);
+  }
+}
 process.exit(bad ? 1 : 0);

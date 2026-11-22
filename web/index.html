@@ -18,11 +18,16 @@
   <button id="btnRedo" title="Tee uudelleen (Ctrl+Y)">↷</button>
   <span class="sep"></span>
   <label class="toggle"><input type="checkbox" id="chkLineup"> Mittakaava</label>
+  <span class="sep"></span>
+  <select id="lightSelect" title="Valaistus"></select>
+  <label class="toggle" title="Valo kiertää aluksen ympäri"><input type="checkbox" id="chkSpin"> Kierrä valoa</label>
+  <label class="toggle" title="Materiaalien tekstuurit (pois: näin alus näkyy RangerGamesin moottorissa nyt)"><input type="checkbox" id="chkTex" checked> Tekstuurit</label>
   <span class="grow"></span>
   <button id="btnOpen" title="Avaa .ship.json">Avaa…</button>
   <button id="btnRecipe" title="Lataa resepti (.ship.json)">⬇ Resepti</button>
   <button id="btnGlb" title="Lataa 3D-malli (.glb)">⬇ .glb</button>
   <button id="btnPack" title="Lataa kaikki alukset pakettina RangerGamesiin (.zip)">⬇ Paketti</button>
+  <label class="toggle" title="Paketin mallit tekstuureineen (isommat tiedostot; RangerGamesin moottori ei vielä lue tekstuureja)"><input type="checkbox" id="chkPackTex"> +tekst.</label>
   <input type="file" id="fileInput" accept=".json,application/json" hidden>
 </header>
 <main>
@@ -30,6 +35,10 @@
     <section>
       <h2>Alus</h2>
       <div id="shipProps"></div>
+    </section>
+    <section>
+      <h2>Materiaalit</h2>
+      <div id="matProps"></div>
     </section>
     <section>
       <h2>Osat <span class="hint">(napauta osaa 3D-näkymässä)</span></h2>
@@ -66,6 +75,9 @@
       <p>Alus rakennetaan <b>osista</b>: runko, siivet, moottorit, ohjaamo, tornit, renkaat, paneelit, piikit, möykyt…
       Jokaisella osalla on paikka, kierto ja skaala, ja sen voi <b>peilata</b> toiselle puolelle tai <b>toistaa</b>
       (esim. avaruusaseman moduulit ympyrässä: kopioita 6, kierto / kopio z = 60).</p>
+      <p><b>Materiaali</b> antaa osan pinnalle kuvion (paneelit, panssari, heksat, orgaaninen, hiilikuitu, kennot, ritilät, lasi, maali, varoitusraidat)
+      sekä metallisuuden ja karheuden. Kuvio on harmaasävyinen, joten osan väri tulee paletista. Omia materiaaleja voi tehdä vasemmalla.
+      Kokeile eri <b>valaistuksia</b> ja <b>Kierrä valoa</b>.</p>
       <p>Kärki osoittaa <b>+z</b>-suuntaan ja ylös on <b>+y</b>.</p>
       <p><b>Runko</b> on poikkileikkausten jono hännästä keulaan: <code>[z, leveys, korkeus, pyöreys, dy]</code>.
       Pyöreys 2 = soikio, 4+ = laatikkomainen, 1 = vinoneliö. Kohina ja rivat tekevät rungosta elävän näköisen.</p>

@@ -14,6 +14,6 @@
     { "name": "siivet", "type": "wing", "at": [0.35, -0.05, -0.6], "mirror": true, "span": 1.9, "root": 1.7, "tip": 0.45, "sweep": 1.1, "thick": 0.12, "dihedral": -4, "tipBand": 0.18 },
     { "name": "pyrstö", "type": "wing", "at": [0, 0.2, -1.6], "rot": [0, 0, 90], "span": 0.8, "root": 0.9, "tip": 0.35, "sweep": 0.6, "thick": 0.08, "tipBand": 0.3 },
     { "name": "moottorit", "type": "engine", "at": [0.32, 0, -2.25], "mirror": true, "r": 0.22, "len": 1.0 },
-    { "name": "tykit", "type": "cylinder", "at": [1.25, -0.08, 0.1], "mirror": true, "r": 0.035, "len": 1.4, "sides": 6, "color": "dark" }
+    { "name": "tykit", "material": "carbon", "type": "cylinder", "at": [1.25, -0.08, 0.1], "mirror": true, "r": 0.035, "len": 1.4, "sides": 6, "color": "dark" }
   ]
 }

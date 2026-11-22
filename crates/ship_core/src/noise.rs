@@ -50,8 +50,12 @@ pub fn hash3(x: int, y: int, z: int, seed: int) -> double {
     if h == 0 {
         h = 1;
     }
+    // the multiplications alone are linear in h (neighbouring inputs give
+    // evenly spaced outputs): fold the high bits in between them
     h = (h * 48271) % 2147483647;
+    h = h ^ (h / 8192);
     h = (h * 48271) % 2147483647;
+    h = h ^ (h / 65536);
     h = (h * 48271) % 2147483647;
     (h as double) / 2147483647.0
 }

@@ -3,10 +3,10 @@
   "name": "Kehä", "class": "station", "length": 1400, "seed": 4,
   "palette": { "hull": "#e3e6ea", "accent": "#ffcc5c", "dark": "#4a5260", "glow": "#ffe08a", "glass": "#bfe9ff", "solar": "#24478f" },
   "parts": [
-    { "name": "asuinrengas", "type": "ring", "r": 6.0, "thick": 0.9, "width": 1.3, "segments": 32, "spokes": 4, "spokeWidth": 0.28, "hub": 1.1 },
+    { "name": "asuinrengas", "material": "plates", "type": "ring", "r": 6.0, "thick": 0.9, "width": 1.3, "segments": 32, "spokes": 4, "spokeWidth": 0.28, "hub": 1.1 },
     { "name": "sisärengas", "type": "ring", "at": [0, 0, -3.0], "rot": [0, 0, 45], "r": 3.6, "thick": 0.5, "width": 0.7, "segments": 24, "spokes": 3, "spokeWidth": 0.18, "hub": 0.9, "windows": false, "accent": "dark" },
     { "name": "ydin", "type": "cylinder", "at": [0, 0, -1.0], "r": 0.8, "len": 7.0, "sides": 12, "capColor": "dark" },
-    { "name": "pallo", "type": "blob", "at": [0, 0, 3.2], "size": [2.6, 2.6, 2.6], "noise": 0, "rings": 10, "sides": 16 },
+    { "name": "pallo", "material": "armor", "type": "blob", "at": [0, 0, 3.2], "size": [2.6, 2.6, 2.6], "noise": 0, "rings": 10, "sides": 16 },
     { "name": "selkäranka", "type": "truss", "at": [0, 0, -7.5], "len": 6.0, "width": 0.7, "segments": 8, "thick": 0.07, "color": "dark" },
     { "name": "paneelit", "type": "panel", "at": [2.4, 0, -8.0], "mirror": true, "size": [4.0, 1.4], "cells": [6, 2], "thick": 0.04, "repeat": { "count": 3, "step": [0, 0, -1.7] } },
     { "name": "telakat", "type": "cylinder", "at": [0, 1.7, 3.2], "r": 0.35, "len": 1.4, "rot": [-90, 0, 0], "capColor": "accent", "repeat": { "count": 4, "rotate": [0, 0, 90] } },

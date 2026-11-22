@@ -18,6 +18,12 @@
   antavat oman `"#rrggbb"`-värin. Oletuksina `hull`, `accent`, `dark`, `glow`,
   `glass`, `solar`; omia nimiä saa lisätä.
 
+- `material`: osien oletusmateriaali (muuten osatyypin mukaan: runko, siivet,
+  laatikot ja renkaat `plates`, ohjaamo `glass`, moottori `vents`, tykkitorni
+  `armor`, paneeli `solar`, muut `paint`)
+- `materials`: omat materiaalit, ks. alla
+- `textureSize`: tekstuurien koko pikseleinä (64…1024, oletus 256)
+
 ### Kaikkien osien yhteiset kentät
 
 | kenttä | |
@@ -30,6 +36,7 @@
 | `color`, `accent` | värit (paletin nimi tai heksa) |
 | `glow` | `true` = valaisematon (valot, ikkunat) |
 | `hidden` | `true` = jätetään pois |
+| `material` | materiaali: valmis kuvio tai reseptin oma materiaali |
 | `panel` | paneelien sävyvaihtelu 0…0,6 |
 
 ### Osat
@@ -55,13 +62,57 @@ Osa rakennetaan omassa koordinaatistossaan: +z eteen, +y ylös.
 Puuttuva parametri saa oletusarvon (`crates/ship_core/src/parts.rs`), joten
 `{ "type": "engine" }` on jo kelvollinen osa.
 
+## Materiaalit ja tekstuurit
+
+Materiaali on kuvio ja pinnan valo-ominaisuudet. Valmiit materiaalit on
+nimetty kuvioidensa mukaan:
+
+| kuvio | |
+| --- | --- |
+| `plates` | paneelit eri kokoisina riveinä, saumat, niitit, luukut |
+| `armor` | isot viistetyt panssarilevyt, naarmut |
+| `hex` | kuusikulmiolaatat (myös kitiini, energiakilpi) |
+| `organic` | soluja ja suonia (Voronoi), märkä pinta |
+| `carbon` | hiilikuitukudos |
+| `solar` | aurinkokennot ja johdinviivat |
+| `vents` | ritilät ja säleiköt |
+| `glass` | lähes sileä lasi |
+| `paint` | maalipinta, jossa lohkeamia (alta paljastuu metallia) |
+| `hazard` | vinot varoitusraidat |
+
+Oma materiaali:
+
+```json
+"materials": {
+  "raskas": { "pattern": "armor", "scale": 1.4, "metal": 0.8, "rough": 0.35, "grime": 0.5, "depth": 1, "seed": 1 }
+}
+```
+
+`scale` on kuvion koko (yksi ruutu on pienellä aluksella noin 2,5 m ja isolla
+1/14 aluksen pituudesta, kerrottuna tällä), `metal` ja `rough` metallisuus ja
+karheus, `grime` lika, valumajäljet ja kuluneet reunat, `depth` saumojen
+syvyys normaalikartassa.
+
+Tekstuurit tehdään ship_coressa (`texture.rs`) ja ne toistuvat saumatta:
+värikartta on harmaasävyinen ja kerrotaan osan värillä (paletti), joten sama
+materiaali käy kaikille väreille. Lisäksi metalli/karheuskartta (glTF:n
+järjestys: G karheus, B metalli) ja normaalikartta korkeuskentästä. UV:t
+projisoidaan kunkin kolmion pääakselin suuntaan osan omassa koordinaatistossa.
+
 ## .glb
 
-Yksi solmu (`extras: { class, length }`), yksi mesh, kaksi primitiiviä:
-materiaali 0 `hull` (valaistu, värit `COLOR_0`:ssa lineaarisina) ja
-materiaali 1 `glow` (`KHR_materials_unlit`, `emissiveFactor` 1). Kolmiot
+Yksi solmu (`extras: { class, length }`), yksi mesh, primitiivi jokaiselle
+materiaalille (valaistu, värit `COLOR_0`:ssa lineaarisina, `TEXCOORD_0`) ja
+viimeisenä `glow` (`KHR_materials_unlit`, `emissiveFactor` 1). Kolmiot
 ovat indeksoimattomia ja litteästi varjostettuja (jokaisella kulmalla
 kolmion normaali).
+
+Tekstuureineen (`ship glb --textures`, editorin ⬇ .glb) jokaisella
+materiaalilla on `baseColorTexture`, `metallicRoughnessTexture` ja
+`normalTexture` (PNG:t samassa tiedostossa). Ilman tekstuureja (`ship pack`
+oletuksena) materiaaleilla on vain `metallicFactor` ja `roughnessFactor`:
+RangerGamesin moottori ei vielä lue tekstuureja, joten pelissä alus näyttää
+samalta kuin editorissa ilman **Tekstuurit**-valintaa.
 
 ## Alus­paketti
 

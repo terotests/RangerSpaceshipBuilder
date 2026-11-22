@@ -19,8 +19,33 @@ const b = (key, label, def) => ({ key, label, kind: "bool", def });
 const c = (key, label, def) => ({ key, label, kind: "color", def });
 const v = (key, label, def, step = 0.05) => ({ key, label, kind: "v3", def, step });
 
+export const PATTERNS = [
+  ["plates", "Paneelit"],
+  ["armor", "Panssari"],
+  ["hex", "Heksat"],
+  ["organic", "Orgaaninen"],
+  ["carbon", "Hiilikuitu"],
+  ["solar", "Kennot"],
+  ["vents", "Ritilä"],
+  ["glass", "Lasi"],
+  ["paint", "Maali"],
+  ["hazard", "Varoitusraidat"],
+];
+
+// a recipe's own material (crates/ship_core/src/material.rs); the defaults
+// depend on the pattern, so these are only where the sliders start
+export const MATERIAL_PARAMS = [
+  { key: "scale", label: "Kuvion koko", kind: "num", def: 1, min: 0.1, max: 6, step: 0.05 },
+  { key: "metal", label: "Metallisuus", kind: "num", def: 0.5, min: 0, max: 1, step: 0.01 },
+  { key: "rough", label: "Karheus", kind: "num", def: 0.45, min: 0.02, max: 1, step: 0.01 },
+  { key: "grime", label: "Lika ja kuluma", kind: "num", def: 0.25, min: 0, max: 1, step: 0.01 },
+  { key: "depth", label: "Syvyys", kind: "num", def: 1, min: 0, max: 3, step: 0.05 },
+  { key: "seed", label: "Siemen", kind: "num", def: 1, min: 1, max: 999, step: 1 },
+];
+
 export const COMMON = [
   { key: "name", label: "Nimi", kind: "text", def: "" },
+  { key: "material", label: "Materiaali", kind: "material", def: "" },
   v("at", "Paikka", [0, 0, 0]),
   v("rot", "Kierto °", [0, 0, 0], 1),
   v("scale", "Skaala", [1, 1, 1], 0.02),
