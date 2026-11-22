@@ -136,3 +136,13 @@ ships/
 
 `size`, `center` ja `radius` ovat mallin yksiköissä: `length / size[2]`
 muuttaa metreiksi, `1 / radius` sovittaa aluksen yksikköpalloon.
+
+## Moottorin oma 3D-kerros (`ship scene`)
+
+`ship scene <resepti> <out.ts> [pituus]` kirjoittaa aluksen TypeScript-moduuliksi
+RangerGamesin `rg.three("add", { shape: "mesh", ... })`-kutsulle (scene3d.rs,
+esim. Solar Pilot): `verts` (hitsatut kulmat, 1/1000 yksikön tarkkuus),
+`tris` (indeksit, vastapäivään ulkoa katsottuna), `colors` (0xrrggbb, sRGB,
+yksi kolmiota kohti) ja `glow` (valaisevien kolmioiden numerot). Malli on
+keskitetty, käännetty niin että keula osoittaa −z:aan, ja skaalattu `pituus`
+yksikön pituiseksi (oletus 2). Tekstuureja tässä muodossa ei ole.

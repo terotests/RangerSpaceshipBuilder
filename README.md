@@ -53,7 +53,7 @@ kokosuhteissa.
 | --- | --- |
 | `crates/ship_core` | Resepti → mesh → `.glb`, **Rangerin Rust-osajoukolla** (`use ranger::prelude::*`): cargo kääntää sen natiivina ja WebAssemblynä, ja `rgrc` kirjoittaa saman lähteen JavaScriptiksi, C++:ksi, Go:ksi, Pythoniksi … (esim. puhelimeen tai peliin, joka rakentaa aluksia itse) |
 | `crates/ship_web` | ship_core WebAssemblynä C ABI:n takana editorille |
-| `crates/ship_cli` | `ship glb [--textures]`, `ship info`, `ship pack [--textures]`, `ship textures` (materiaalien kartat PNG:ksi) |
+| `crates/ship_cli` | `ship glb [--textures]`, `ship info`, `ship pack [--textures]`, `ship scene` (TS-moduuli RangerGamesin `rg.three` "mesh"-muodolle, esim. Solar Pilot), `ship textures` (materiaalien kartat PNG:ksi) |
 | `web/` | Editori: osalista, materiaalit, ominaisuudet, JSON-näkymä, WebGL-näkymä (PBR-varjostus, valaistukset, valinta napauttamalla), kumoa/tee uudelleen, omat alukset selaimen muistiin, lataukset (resepti, .glb, paketti .zip) |
 | `ships/` | Valmiit alukset |
 
